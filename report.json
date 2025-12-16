@@ -1,0 +1,67 @@
+{
+  "summary": {
+    "total_vulnerabilities": 7,
+    "critical": 1,
+    "high": 3,
+    "medium": 3,
+    "low": 0
+  },
+  "details": [
+    {
+      "id": 1,
+      "file": "input.py",
+      "line_numbers": [11,12,13],
+      "original": "PAYMENT_TOKEN = \"tok_production_998877\"\nMAIL_SERVER_KEY = \"mail_srv_key_ABCDEFG\"\nINTERNAL_AUTH = \"admin_internal_5566\"",
+      "updated": "PAYMENT_TOKEN = os.environ.get(\"PAYMENT_TOKEN\")\nMAIL_SERVER_KEY = os.environ.get(\"MAIL_SERVER_KEY\")\nINTERNAL_AUTH = os.environ.get(\"INTERNAL_AUTH\", \"\")",
+      "fix_explanation": "Hard-coded secrets removed and replaced with environment variable lookups so secrets are not stored in source control."
+    },
+    {
+      "id": 2,
+      "file": "input.py",
+      "line_numbers": [27],
+      "original": "q = \"SELECT id,name,balance FROM profiles WHERE id = '%s'\" % uid",
+      "updated": "q = \"SELECT id, name, balance FROM profiles WHERE id = ?\"",
+      "fix_explanation": "Use parameterized SQL query to prevent SQL injection (string interpolation replaced with bound parameter)."
+    },
+    {
+      "id": 3,
+      "file": "input.py",
+      "line_numbers": [20],
+      "original": "hashed = hashlib.md5(raw.encode()).hexdigest()",
+      "updated": "hashed = hmac.new(INTERNAL_AUTH.encode(), username.encode(), hashlib.sha256).hexdigest()",
+      "fix_explanation": "Switch from insecure MD5 to HMAC-SHA256 for stronger cryptographic integrity and include a secret key for keying."
+    },
+    {
+      "id": 4,
+      "file": "input.py",
+      "line_numbers": [40],
+      "original": "resp = requests.post(url, json={\"token\": PAYMENT_TOKEN, \"amount\": amount})",
+      "updated": "# URL validated above to prevent SSRF\nresp = requests.post(url, json={\"token\": PAYMENT_TOKEN, \"amount\": amount})",
+      "fix_explanation": "Add validation to the notify_url to prevent SSRF: require http(s), block local addresses and optionally allow only configured hosts."
+    },
+    {
+      "id": 5,
+      "file": "input.py",
+      "line_numbers": [45,46],
+      "original": "with open(path) as f:\n    cfg = yaml.safe_load(f)",
+      "updated": "base_dir = os.environ.get(\"CONFIG_DIR\", \".\")\nabs_base = os.path.abspath(base_dir)\nabs_path = os.path.abspath(os.path.join(base_dir, path))\nif not abs_path.startswith(abs_base + os.sep):\n    raise ValueError(\"Invalid config path\")\nwith open(abs_path) as f:\n    cfg = yaml.safe_load(f)",
+      "fix_explanation": "Restrict file access to a configured directory and prevent path traversal in config file loading."
+    },
+    {
+      "id": 6,
+      "file": "input.py",
+      "line_numbers": [51,52],
+      "original": "cmd = f\"zip {name}.zip {DB_FILE}\"\nsubprocess.Popen(cmd, shell=True)",
+      "updated": "# Sanitize filename to avoid directory traversal and injection\nif not re.match(r\"^[A-Za-z0-9_\\-]+$\", name):\n    raise ValueError(\"Invalid filename\")\nzip_path = f\"{name}.zip\"\nimport zipfile\nwith zipfile.ZipFile(zip_path, \"w\", zipfile.ZIP_DEFLATED) as z:\n    z.write(DB_FILE)",
+      "fix_explanation": "Replace shell invocation with Python's zipfile module and sanitize filename to avoid command injection."
+    },
+    {
+      "id": 7,
+      "file": "input.py",
+      "line_numbers": [88],
+      "original": "app.run(debug=True)",
+      "updated": "debug_mode = os.environ.get(\"FLASK_DEBUG\", \"0\") in (\"1\", \"true\", \"True\")\napp.run(debug=debug_mode)",
+      "fix_explanation": "Do not enable debug mode by default in production. Allow debug mode via environment variable only."
+    }
+  ]
+}
