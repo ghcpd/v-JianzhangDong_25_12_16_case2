@@ -1,0 +1,83 @@
+{
+  "summary": {
+    "total_vulnerabilities": 9,
+    "critical": 5,
+    "high": 2,
+    "medium": 1,
+    "low": 1
+  },
+  "details": [
+    {
+      "id": 1,
+      "file": "input.py",
+      "line_numbers": [11,12,13],
+      "original": "PAYMENT_TOKEN = \"tok_production_998877\"\nMAIL_SERVER_KEY = \"mail_srv_key_ABCDEFG\"\nINTERNAL_AUTH = \"admin_internal_5566\"",
+      "updated": "PAYMENT_TOKEN = os.getenv(\"PAYMENT_TOKEN\")\nMAIL_SERVER_KEY = os.getenv(\"MAIL_SERVER_KEY\")\nSECRET_KEY = os.getenv(\"SECRET_KEY\", \"dev-secret\")",
+      "fix_explanation": "Hardcoded secrets removed and loaded from environment variables to prevent leakage. Severity: High. Affected lines: 11-13."
+    },
+    {
+      "id": 2,
+      "file": "input.py",
+      "line_numbers": [18,19,20],
+      "original": "def auth_user(info):\n    raw = info.get(\"username\", \"\") + INTERNAL_AUTH\n    hashed = hashlib.md5(raw.encode()).hexdigest()\n    return hashed",
+      "updated": "def auth_user(info):\n    # Generate a time-limited token if username exists in DB\n    username = info.get(\"username\")\n    ...\n    return generate_token(username)",
+      "fix_explanation": "Replaced insecure MD5-based token generation with time-limited tokens (itsdangerous) and server-side user existence checks. Severity: High. Affects auth flow and prevents weak token prediction."
+    },
+    {
+      "id": 3,
+      "file": "input.py",
+      "line_numbers": [24,25,26],
+      "original": "q = \"SELECT id,name,balance FROM profiles WHERE id = '%s'\" % uid\n    c.execute(q)",
+      "updated": "c.execute(\"SELECT id,name,balance FROM profiles WHERE id = ?\", (uid,))",
+      "fix_explanation": "Parameterized SQL queries replace string interpolation to mitigate SQL Injection. Also uid is validated to digits only. Severity: Critical."
+    },
+    {
+      "id": 4,
+      "file": "input.py",
+      "line_numbers": [34,35,36],
+      "original": "url = payload.get(\"notify_url\")\n    resp = requests.post(url, json={\"token\": PAYMENT_TOKEN, \"amount\": amount})",
+      "updated": "parsed = urlparse(url)\n    host = parsed.hostname\n    if ALLOWED_NOTIFY_HOSTS and host not in ALLOWED_NOTIFY_HOSTS:\n        raise ValueError(\"notify_url host not allowed\")\n    resp = requests.post(url, json={...}, timeout=5)",
+      "fix_explanation": "Validate notify_url against an allowlist, enforce timeouts and exception handling to prevent SSRF and slow requests. Severity: Critical."
+    },
+    {
+      "id": 5,
+      "file": "input.py",
+      "line_numbers": [40,41,42],
+      "original": "def update_records(path):\n    with open(path) as f:\n        cfg = yaml.safe_load(f)\n    return cfg",
+      "updated": "full = os.path.realpath(path)\n    cfg_dir = os.path.realpath(CONFIG_DIR)\n    if not full.startswith(cfg_dir + os.sep):\n        raise ValueError(\"access to specified path is not allowed\")\n    with open(full) as f:\n        cfg = yaml.safe_load(f)\n    return cfg",
+      "fix_explanation": "Restrict config file access to a designated config directory and validate realpath to prevent path traversal / arbitrary file read. Severity: Critical."
+    },
+    {
+      "id": 6,
+      "file": "input.py",
+      "line_numbers": [46,47,48],
+      "original": "cmd = f\"zip {name}.zip {DB_FILE}\"\n    subprocess.Popen(cmd, shell=True)",
+      "updated": "with zipfile.ZipFile(archive_name, 'w', zipfile.ZIP_DEFLATED) as zf:\n        zf.write(DB_FILE, arcname=os.path.basename(DB_FILE))",
+      "fix_explanation": "Removed shell invocation and used Python's zipfile to avoid command injection and shell metacharacter interpretation. Input name is strict-validated. Severity: Critical."
+    },
+    {
+      "id": 7,
+      "file": "input.py",
+      "line_numbers": [60],
+      "original": "app.run(debug=True)",
+      "updated": "app.run(host=host, port=port, debug=debug)  # debug controlled by FLASK_DEBUG env var",
+      "fix_explanation": "Disabled hard-coded debug mode; debug is controlled via environment variables to prevent exposing the interactive debugger in production. Severity: Medium."
+    },
+    {
+      "id": 8,
+      "file": "input.py",
+      "line_numbers": [29,52,55],
+      "original": "# no authentication on sensitive endpoints (profile/transfer/config/export)\n@app.route(\"/profile\")\ndef api_profile():\n    ...",
+      "updated": "@require_auth\ndef api_profile():\n    ...",
+      "fix_explanation": "Enforced token-based authentication on sensitive endpoints to prevent unauthenticated access. Severity: Critical."
+    },
+    {
+      "id": 9,
+      "file": "input.py",
+      "line_numbers": [33],
+      "original": "log = f\"transfer:{target}:{amount}\"\n    print(log)",
+      "updated": "# use logger and avoid printing sensitive data\n    logger.info(\"transfer requested\")",
+      "fix_explanation": "Removed printing of sensitive transaction details; use structured logging with control over log level and destinations. Severity: Low."
+    }
+  ]
+}

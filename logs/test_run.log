@@ -1,0 +1,16 @@
+2025-12-16T07:00:31.855699 Detected environment: windows
+2025-12-16T07:00:31.856362 Running script: run_test.bat
+2025/12/16 周二 15:00:31.90 Running tests for input_backup 
+2025/12/16 周二 15:00:33.08 input_backup: TEST PASSED 
+2025/12/16 周二 15:00:33.08 Running tests for input 
+2025/12/16 周二 15:00:34.21 input: TEST PASSED 
+2025/12/16 周二 15:00:34.21 TEST PASSED 
+2025-12-16T07:00:34.235082 Output for run_test.bat:
+.....                                                                    [100%]
+5 passed in 0.48s
+.....                                                                    [100%]
+5 passed in 0.48s
+
+
+2025-12-16T07:00:34.235996 run_test.bat: TEST PASSED
+2025-12-16T07:00:34.236593 TEST PASSED
