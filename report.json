@@ -1,0 +1,75 @@
+{
+  "summary": {
+    "total_vulnerabilities": 9,
+    "critical": 3,
+    "high": 4,
+    "medium": 1,
+    "low": 1
+  },
+  "details": [
+    {
+      "id": 1,
+      "file": "input.py",
+      "line_numbers": [11, 12, 13],
+      "original": "PAYMENT_TOKEN = \"tok_production_998877\"\nMAIL_SERVER_KEY = \"mail_srv_key_ABCDEFG\"\nINTERNAL_AUTH = \"admin_internal_5566\"",
+      "updated": "PAYMENT_TOKEN and other secrets are loaded from environment variables (os.environ).",
+      "fix_explanation": "Hardcoded secrets removed from source and loaded from environment variables. This prevents secret leakage in source control and encourages secret management (severity: high)."
+    },
+    {
+      "id": 2,
+      "file": "input.py",
+      "line_numbers": [18, 19, 20],
+      "original": "raw = info.get(\"username\", \"\") + INTERNAL_AUTH\nhashed = hashlib.md5(raw.encode()).hexdigest()",
+      "updated": "HMAC-SHA256 using INTERNAL_AUTH as key (hmac.new(INTERNAL_AUTH.encode(), username.encode(), hashlib.sha256).hexdigest()).",
+      "fix_explanation": "Weak MD5-based custom hashing replaced with HMAC-SHA256 using a secret key, mitigating predictable/fast hashing and collision weaknesses (severity: medium)."
+    },
+    {
+      "id": 3,
+      "file": "input.py",
+      "line_numbers": [24, 25, 26, 27, 28, 29, 30, 31],
+      "original": "conn = sqlite3.connect(DB_FILE)\n    c = conn.cursor()\n    q = \"SELECT id,name,balance FROM profiles WHERE id = '%s'\" % uid\n    c.execute(q)\n    data = c.fetchall()",
+      "updated": "Use parameterized queries and input validation (c.execute(\"SELECT ... WHERE id = ?\", (uid,)) after validating uid matches digits).",
+      "fix_explanation": "The original code constructed SQL statements via string formatting (SQL injection). The fix applies input validation and parameterized queries to prevent injection attacks (severity: high)."
+    },
+    {
+      "id": 4,
+      "file": "input.py",
+      "line_numbers": [34, 35, 36, 37, 38, 39, 40, 41],
+      "original": "target = payload.get(\"target\")\n    amount = payload.get(\"amount\")\n    log = f\"transfer:{target}:{amount}\"\n    print(log)\n    url = payload.get(\"notify_url\")\n    resp = requests.post(url, json={\"token\": PAYMENT_TOKEN, \"amount\": amount})",
+      "updated": "Validate target and amount, enforce https scheme and optional host whitelist for notify_url, use requests.post with a timeout and check response status, and avoid printing sensitive values (mask values in logs).",
+      "fix_explanation": "Unvalidated URLs allowed SSRF and external requests without timeout or response checks; sensitive data was printed. The fix validates inputs, restricts schemes/hosts, uses timeouts, and masks logs (severity: critical)."
+    },
+    {
+      "id": 5,
+      "file": "input.py",
+      "line_numbers": [44, 45, 46, 47],
+      "original": "with open(path) as f:\n        cfg = yaml.safe_load(f)\n    return cfg",
+      "updated": "Allow only filenames matching a safe regex and located under a configured CONFIG_DIR (use realpath checks to prevent path traversal) before calling yaml.safe_load.",
+      "fix_explanation": "Directly opening a user-controlled path allowed path traversal and arbitrary file reads. The fix restricts files to a config directory and sanitizes names (severity: critical)."
+    },
+    {
+      "id": 6,
+      "file": "input.py",
+      "line_numbers": [50, 51, 52, 53],
+      "original": "cmd = f\"zip {name}.zip {DB_FILE}\"\n    subprocess.Popen(cmd, shell=True)",
+      "updated": "Use Python's zipfile module to build an archive safely, and validate 'name' with a safe regex (no shell execution).",
+      "fix_explanation": "Constructing shell commands with user input (and shell=True) enables command injection. Replacing shell invocation with zipfile avoids shell and injection (severity: critical)."
+    },
+    {
+      "id": 7,
+      "file": "input.py",
+      "line_numbers": [87, 88],
+      "original": "if __name__ == \"__main__\":\n    app.run(debug=True)",
+      "updated": "app.run(debug=(os.environ.get('FLASK_DEBUG','0') == '1')) -- debug disabled by default and controlled by env var.",
+      "fix_explanation": "Running Flask with debug=True in source is unsafe (interactive debugger can execute code). The change disables debug by default and makes it environment-controlled (severity: high)."
+    },
+    {
+      "id": 8,
+      "file": "input.py",
+      "line_numbers": [68, 69, 70, 71, 74, 75, 76, 77, 80, 81, 82, 83, 84],
+      "original": "@app.route(\"/transfer\", methods=[\"POST\"])... return jsonify({\"result\": transfer_funds(p)})\n... @app.route(\"/config\", methods=[\"POST\"])... return jsonify(update_records(path))\n... @app.route(\"/export\")... export_data(name)",
+      "updated": "Require X-ADMIN-TOKEN header (ADMIN_API_KEY from env) for sensitive endpoints (transfer, config, export).",
+      "fix_explanation": "Sensitive operations had no authorization. Adding a required admin token header protects these actions from unauthorized use (severity: high)."
+    }
+  ]
+}
