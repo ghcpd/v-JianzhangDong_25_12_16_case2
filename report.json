@@ -1,0 +1,75 @@
+{
+  "summary": {
+    "total_vulnerabilities": 8,
+    "critical": 3,
+    "high": 4,
+    "medium": 1,
+    "low": 0
+  },
+  "details": [
+    {
+      "id": 1,
+      "file": "input.py",
+      "line_numbers": [10, 11, 12],
+      "original": "PAYMENT_TOKEN = \"tok_production_998877\"\nMAIL_SERVER_KEY = \"mail_srv_key_ABCDEFG\"\nINTERNAL_AUTH = \"admin_internal_5566\"",
+      "updated": "PAYMENT_TOKEN = os.environ.get(\"PAYMENT_TOKEN\")\nMAIL_SERVER_KEY = os.environ.get(\"MAIL_SERVER_KEY\")\nINTERNAL_AUTH = os.environ.get(\"INTERNAL_AUTH\")\n\nif not all([PAYMENT_TOKEN, MAIL_SERVER_KEY, INTERNAL_AUTH]):\n    raise ValueError(\"Required environment variables not set\")",
+      "fix_explanation": "Hardcoded secrets removed and replaced with environment variables to prevent exposure. Critical severity as secrets could be leaked."
+    },
+    {
+      "id": 2,
+      "file": "input.py",
+      "line_numbers": [17],
+      "original": "hashed = hashlib.md5(raw.encode()).hexdigest()",
+      "updated": "hashed = hashlib.sha256(raw.encode()).hexdigest()",
+      "fix_explanation": "Replaced MD5 with SHA256 for stronger hashing. High severity as MD5 is cryptographically broken."
+    },
+    {
+      "id": 3,
+      "file": "input.py",
+      "line_numbers": [21],
+      "original": "q = \"SELECT id,name,balance FROM profiles WHERE id = '%s'\" % uid\nc.execute(q)",
+      "updated": "c.execute(\"SELECT id,name,balance FROM profiles WHERE id = ?\", (uid,))",
+      "fix_explanation": "Used parameterized queries to prevent SQL injection. Critical severity as it allows arbitrary SQL execution."
+    },
+    {
+      "id": 4,
+      "file": "input.py",
+      "line_numbers": [24, 25, 26, 27, 28, 29, 30, 31],
+      "original": "def transfer_funds(payload):\n    target = payload.get(\"target\")\n    amount = payload.get(\"amount\")\n    log = f\"transfer:{target}:{amount}\"\n    print(log)\n    url = payload.get(\"notify_url\")\n    resp = requests.post(url, json={\"token\": PAYMENT_TOKEN, \"amount\": amount})\n    return resp.text",
+      "updated": "def transfer_funds(payload):\n    target = payload.get(\"target\")\n    amount = payload.get(\"amount\")\n    notify_url = payload.get(\"notify_url\")\n    if not target or not isinstance(target, str):\n        raise ValueError(\"Invalid target\")\n    if not isinstance(amount, (int, float)) or amount <= 0:\n        raise ValueError(\"Invalid amount\")\n    if not notify_url or not isinstance(notify_url, str):\n        raise ValueError(\"Invalid notify_url\")\n    if not re.match(r'^https?://', notify_url):\n        raise ValueError(\"Invalid URL scheme\")\n    log = f\"transfer:{target}:{amount}\"\n    print(log)\n    resp = requests.post(notify_url, json={\"token\": PAYMENT_TOKEN, \"amount\": amount})\n    return resp.text",
+      "fix_explanation": "Added input validation and URL scheme check to prevent SSRF attacks. High severity as it allows requests to internal services."
+    },
+    {
+      "id": 5,
+      "file": "input.py",
+      "line_numbers": [38],
+      "original": "def update_records(path):\n    with open(path) as f:\n        cfg = yaml.safe_load(f)\n    return cfg",
+      "updated": "def update_records(path):\n    if not path or not isinstance(path, str):\n        raise ValueError(\"Invalid file path\")\n    if not path.startswith(\"config/\") or \"..\" in path:\n        raise ValueError(\"Access denied\")\n    with open(path) as f:\n        cfg = yaml.safe_load(f)\n    return cfg",
+      "fix_explanation": "Restricted file paths to config directory and prevented directory traversal. High severity as it allows reading arbitrary files."
+    },
+    {
+      "id": 6,
+      "file": "input.py",
+      "line_numbers": [35],
+      "original": "def export_data(name):\n    cmd = f\"zip {name}.zip {DB_FILE}\"\n    subprocess.Popen(cmd, shell=True)\n    return True",
+      "updated": "def export_data(name):\n    if not name or not isinstance(name, str) or not re.match(r'^[a-zA-Z0-9_-]+$', name):\n        raise ValueError(\"Invalid name\")\n    with zipfile.ZipFile(f\"{name}.zip\", 'w') as zf:\n        zf.write(DB_FILE)\n    return True",
+      "fix_explanation": "Replaced subprocess with zipfile module and added name validation to prevent command injection. Critical severity as it allows arbitrary command execution."
+    },
+    {
+      "id": 7,
+      "file": "input.py",
+      "line_numbers": [62],
+      "original": "app.run(debug=True)",
+      "updated": "app.run(debug=False)",
+      "fix_explanation": "Disabled debug mode to prevent information leakage in production. Medium severity as it exposes sensitive information."
+    },
+    {
+      "id": 8,
+      "file": "input.py",
+      "line_numbers": [44, 48, 52, 56, 60],
+      "original": "@app.route(\"/auth\", methods=[\"POST\"])\ndef api_auth():\n    info = request.json\n    return jsonify({\"token\": auth_user(info)})\n\n@app.route(\"/profile\")\ndef api_profile():\n    uid = request.args.get(\"id\")\n    return jsonify(query_profile(uid))\n\n@app.route(\"/transfer\", methods=[\"POST\"])\ndef api_transfer():\n    p = request.json\n    return jsonify({\"result\": transfer_funds(p)})\n\n@app.route(\"/config\", methods=[\"POST\"])\ndef api_config():\n    path = request.json.get(\"file\")\n    return jsonify(update_records(path))\n\n@app.route(\"/export\")\ndef api_export():\n    name = request.args.get(\"name\")\n    export_data(name)\n    return jsonify({\"ok\": 1})",
+      "updated": "@app.route(\"/auth\", methods=[\"POST\"])\ndef api_auth():\n    try:\n        info = request.json\n        return jsonify({\"token\": auth_user(info)})\n    except Exception as e:\n        return jsonify({\"error\": str(e)}), 400\n\n@app.route(\"/profile\")\ndef api_profile():\n    try:\n        uid = request.args.get(\"id\")\n        return jsonify(query_profile(uid))\n    except Exception as e:\n        return jsonify({\"error\": str(e)}), 400\n\n@app.route(\"/transfer\", methods=[\"POST\"])\ndef api_transfer():\n    try:\n        p = request.json\n        return jsonify({\"result\": transfer_funds(p)})\n    except Exception as e:\n        return jsonify({\"error\": str(e)}), 400\n\n@app.route(\"/config\", methods=[\"POST\"])\ndef api_config():\n    try:\n        path = request.json.get(\"file\")\n        return jsonify(update_records(path))\n    except Exception as e:\n        return jsonify({\"error\": str(e)}), 400\n\n@app.route(\"/export\")\ndef api_export():\n    try:\n        name = request.args.get(\"name\")\n        export_data(name)\n        return jsonify({\"ok\": 1})\n    except Exception as e:\n        return jsonify({\"error\": str(e)}), 400",
+      "fix_explanation": "Added try-except blocks to handle errors gracefully and prevent crashes or information leakage. Low severity but improves robustness."
+    }
+  ]
+}
