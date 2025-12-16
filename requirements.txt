@@ -1,0 +1,5 @@
+Flask>=2.0
+PyYAML>=5.3
+requests>=2.20
+itsdangerous>=2.0
+pytest>=6.0
