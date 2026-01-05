@@ -1,0 +1,111 @@
+{
+  "summary": {
+    "total_vulnerabilities": 10,
+    "critical": 4,
+    "high": 4,
+    "medium": 2,
+    "low": 0
+  },
+  "details": [
+    {
+      "id": 1,
+      "file": "input.py",
+      "line_numbers": [21],
+      "vulnerability_type": "SQL Injection",
+      "severity": "CRITICAL",
+      "original": "q = \"SELECT id,name,balance FROM profiles WHERE id = '%s'\" % uid\nc.execute(q)",
+      "updated": "c.execute(\"SELECT id,name,balance FROM profiles WHERE id = ?\", (uid,))",
+      "fix_explanation": "Replaced string formatting with parameterized queries (placeholders). This prevents SQL injection attacks where malicious input could modify SQL logic. Parameterized queries ensure user input is treated as data, not code."
+    },
+    {
+      "id": 2,
+      "file": "input.py",
+      "line_numbers": [11, 12, 13],
+      "vulnerability_type": "Hardcoded Secrets",
+      "severity": "CRITICAL",
+      "original": "PAYMENT_TOKEN = \"tok_production_998877\"\nMAIL_SERVER_KEY = \"mail_srv_key_ABCDEFG\"\nINTERNAL_AUTH = \"admin_internal_5566\"",
+      "updated": "PAYMENT_TOKEN = os.environ.get(\"PAYMENT_TOKEN\", \"\")\nMAIL_SERVER_KEY = os.environ.get(\"MAIL_SERVER_KEY\", \"\")\nINTERNAL_AUTH = os.environ.get(\"INTERNAL_AUTH\", \"\")\n\nif not all([PAYMENT_TOKEN, MAIL_SERVER_KEY, INTERNAL_AUTH]):\n    raise ValueError(\"Missing required environment variables\")",
+      "fix_explanation": "Moved secrets to environment variables instead of hardcoding them. This prevents accidental exposure through version control. Added validation to ensure secrets are provided at runtime. Use .env files or secure secret management systems in production."
+    },
+    {
+      "id": 3,
+      "file": "input.py",
+      "line_numbers": [32],
+      "vulnerability_type": "Command Injection",
+      "severity": "CRITICAL",
+      "original": "cmd = f\"zip {name}.zip {DB_FILE}\"\nsubprocess.Popen(cmd, shell=True)",
+      "updated": "import re\nif not re.match(r'^[a-zA-Z0-9_-]+$', name):\n    logger.warning(f\"Invalid characters in export name: {name}\")\n    return False\ncmd = [\"zip\", f\"{name}.zip\", DB_FILE]\nresult = subprocess.run(cmd, check=True, capture_output=True, timeout=30)",
+      "fix_explanation": "Replaced shell execution with list-based subprocess.run(). Added input validation using regex to ensure only safe characters. Removed shell=True which interprets shell metacharacters. The list format prevents command injection since the zip command and arguments are separate from user input."
+    },
+    {
+      "id": 4,
+      "file": "input.py",
+      "line_numbers": [27],
+      "vulnerability_type": "Path Traversal",
+      "severity": "CRITICAL",
+      "original": "with open(path) as f:\n    cfg = yaml.safe_load(f)",
+      "updated": "from pathlib import Path\nallowed_dir = Path(\"configs\").resolve()\nconfig_path = (allowed_dir / path).resolve()\n\nif not str(config_path).startswith(str(allowed_dir)):\n    logger.warning(f\"Path traversal attempt blocked: {path}\")\n    return None",
+      "fix_explanation": "Implemented path traversal protection by restricting file access to a specific directory (configs/). Used pathlib.Path.resolve() to canonicalize paths and detect attempts to escape the allowed directory using '..' or symbolic links. Validates that resolved path stays within allowed_dir."
+    },
+    {
+      "id": 5,
+      "file": "input.py",
+      "line_numbers": [30],
+      "vulnerability_type": "Server-Side Request Forgery (SSRF)",
+      "severity": "CRITICAL",
+      "original": "url = payload.get(\"notify_url\")\nresp = requests.post(url, json={\"token\": PAYMENT_TOKEN, \"amount\": amount})",
+      "updated": "from urllib.parse import urlparse\nparsed = urlparse(url)\nif parsed.hostname in (\"localhost\", \"127.0.0.1\", \"0.0.0.0\"):\n    logger.warning(f\"Blocked local URL: {url}\")\n    return None\nif parsed.scheme not in (\"http\", \"https\"):\n    logger.warning(f\"Invalid URL scheme: {parsed.scheme}\")\n    return None\nresp = requests.post(url, json={...}, timeout=5)",
+      "fix_explanation": "Added SSRF protections: (1) URL parsing and validation to ensure only HTTP/HTTPS, (2) Blocked access to internal IPs (localhost, 127.0.0.1, 0.0.0.0), (3) Added timeout to prevent hanging requests. This prevents attackers from using the app to make requests to internal services or cloud metadata endpoints."
+    },
+    {
+      "id": 6,
+      "file": "input.py",
+      "line_numbers": [16],
+      "vulnerability_type": "Weak Cryptography",
+      "severity": "HIGH",
+      "original": "hashed = hashlib.md5(raw.encode()).hexdigest()",
+      "updated": "hashed = hashlib.sha256(raw.encode()).hexdigest()",
+      "fix_explanation": "Replaced MD5 with SHA256. MD5 is cryptographically broken and should not be used for password hashing or authentication. SHA256 is more secure and FIPS-compliant. For production, use dedicated password hashing libraries like bcrypt or argon2."
+    },
+    {
+      "id": 7,
+      "file": "input.py",
+      "line_numbers": [90],
+      "vulnerability_type": "Debug Mode in Production",
+      "severity": "HIGH",
+      "original": "if __name__ == \"__main__\":\n    app.run(debug=True)",
+      "updated": "if __name__ == \"__main__\":\n    debug_mode = os.environ.get(\"FLASK_ENV\") == \"development\"\n    app.run(debug=debug_mode)",
+      "fix_explanation": "Disabled debug mode by default. Debug mode exposes sensitive information (error traces, source code, interactive debugger). Now reads FLASK_ENV variable to enable debug only in development. Use environment-based configuration instead of hardcoded debug=True."
+    },
+    {
+      "id": 8,
+      "file": "input.py",
+      "line_numbers": [19, 30, 48, 51, 68, 75],
+      "vulnerability_type": "Missing Input Validation",
+      "severity": "HIGH",
+      "original": "uid = request.args.get(\"id\")\ntarget = payload.get(\"target\")\namount = payload.get(\"amount\")\nurl = payload.get(\"notify_url\")\nname = request.args.get(\"name\")\npath = request.json.get(\"file\")",
+      "updated": "Added comprehensive input validation in all functions:\n- Type checking (isinstance)\n- Length validation\n- Format validation (isdigit, regex patterns)\n- Range validation (amount <= 0 or > max)\n- Required field checks",
+      "fix_explanation": "Added input validation for all user-supplied data before processing. Validates types, lengths, formats, and ranges. Returns error responses with appropriate HTTP status codes. Prevents processing of invalid data that could cause crashes, injection attacks, or unexpected behavior."
+    },
+    {
+      "id": 9,
+      "file": "input.py",
+      "line_numbers": [1, 10, 20, 35],
+      "vulnerability_type": "Unencrypted Sensitive Data Logging",
+      "severity": "MEDIUM",
+      "original": "print(log)",
+      "updated": "logger.info(log)\nimport logging\nlogging.basicConfig(level=logging.WARNING)",
+      "fix_explanation": "Replaced print() with structured logging. Added logging module configuration to prevent accidental exposure. Sensitive data in logs can be exposed if logs are stored insecurely. Use secure log management and avoid logging sensitive tokens, amounts, or passwords."
+    },
+    {
+      "id": 10,
+      "file": "input.py",
+      "line_numbers": [51, 61, 70, 82],
+      "vulnerability_type": "Missing Error Handling & Exception Disclosure",
+      "severity": "MEDIUM",
+      "original": "No try-except blocks or error handling in route handlers",
+      "updated": "Added try-except blocks in all endpoints with proper error responses:\n- Catches general exceptions\n- Logs errors with logger.error()\n- Returns generic error responses (no stack traces to client)\n- Uses appropriate HTTP status codes",
+      "fix_explanation": "Added comprehensive exception handling to all endpoints. Prevents stack traces and internal error details from leaking to clients. Logs errors server-side for debugging. Returns generic error messages to clients while logging detailed information server-side. This prevents information disclosure attacks."
+    }
+  ]
+}

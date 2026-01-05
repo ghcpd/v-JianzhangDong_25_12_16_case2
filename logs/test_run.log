@@ -1,0 +1,312 @@
+2025-12-16 15:54:15 - INFO - Detected OS: Windows
+2025-12-16 15:54:15 - INFO - ======================================================================
+2025-12-16 15:54:15 - INFO - AUTOMATIC TEST EXECUTION STARTED
+2025-12-16 15:54:15 - INFO - ======================================================================
+2025-12-16 15:54:15 - INFO - Timestamp: 2025-12-16 15:54:15
+2025-12-16 15:54:15 - INFO - Environment: windows
+2025-12-16 15:54:15 - INFO - Python Version: 3.14.0 (tags/v3.14.0:ebf955d, Oct  7 2025, 10:15:03) [MSC v.1944 64 bit (AMD64)]
+2025-12-16 15:54:15 - INFO - 
+2025-12-16 15:54:15 - INFO - 
+2025-12-16 15:54:15 - INFO - ----------------------------------------------------------------------
+2025-12-16 15:54:15 - INFO - Testing: input_backup.py
+2025-12-16 15:54:15 - INFO - ----------------------------------------------------------------------
+2025-12-16 15:54:15 - INFO - Running run_test.bat for input_backup.py...
+2025-12-16 15:54:15 - INFO - Test output:
+
+=========================================
+Running security tests for Flask app
+=========================================
+
+Testing file: input_backup.py
+Test Environment: Windows
+Python 3.14.0
+
+[TEST 1] Syntax validation...
+‚ú?Syntax valid
+
+[TEST 2] Security checks...
+input_backup.py:    q = "SELECT id,name,balance FROM profiles WHERE id = '%s'" % uid
+‚ö?SQL injection pattern found (expected in backup
+‚ú?No obvious SQL injection patterns
+‚ö?shell=True found (expected in backup
+‚ú?No dangerous subprocess calls with shell=True
+‚ö?debug=True found (expected in backup
+‚ú?Debug mode properly configured
+
+=========================================
+Vulnerability tests confirmed in backup
+FINDSTR: Œﬁ∑®¥Úø™ >nul
+FINDSTR: Œﬁ∑®¥Úø™ 2>&1
+
+2025-12-16 15:54:15 - INFO - 
+2025-12-16 15:54:15 - INFO - ----------------------------------------------------------------------
+2025-12-16 15:54:15 - INFO - Testing: input.py
+2025-12-16 15:54:15 - INFO - ----------------------------------------------------------------------
+2025-12-16 15:54:15 - INFO - Running run_test.bat for input.py...
+2025-12-16 15:54:15 - INFO - Test output:
+
+=========================================
+Running security tests for Flask app
+=========================================
+
+Testing file: input.py
+Test Environment: Windows
+Python 3.14.0
+
+[TEST 1] Syntax validation...
+‚ú?Syntax valid
+
+[TEST 2] Security checks...
+‚ú?No hardcoded secrets detected
+input.py:        c.execute("SELECT id,name,balance FROM profiles WHERE id = ?", (uid,))
+‚ú?FAILED: SQL injection vulnerability found
+FINDSTR: Œﬁ∑®¥Úø™ >nul
+FINDSTR: Œﬁ∑®¥Úø™ 2>&1
+
+2025-12-16 15:54:15 - INFO - 
+2025-12-16 15:54:15 - INFO - ======================================================================
+2025-12-16 15:54:15 - INFO - TEST SUMMARY
+2025-12-16 15:54:15 - INFO - ======================================================================
+2025-12-16 15:54:15 - INFO - input_backup.py: PASSED
+2025-12-16 15:54:15 - INFO - input.py: FAILED
+2025-12-16 15:54:15 - INFO - 
+2025-12-16 15:54:15 - INFO - ======================================================================
+2025-12-16 15:54:15 - INFO - TEST FAILED
+2025-12-16 15:54:15 - INFO - Some tests failed. Please review the logs above.
+2025-12-16 15:54:15 - INFO - 
+2025-12-16 15:54:15 - INFO - Test execution completed at 2025-12-16 15:54:15
+2025-12-16 15:54:15 - INFO - Log file: logs\test_run.log
+2025-12-16 15:54:15 - INFO - 
+2025-12-16 15:54:44 - INFO - Detected OS: Windows
+2025-12-16 15:54:44 - INFO - ======================================================================
+2025-12-16 15:54:44 - INFO - AUTOMATIC TEST EXECUTION STARTED
+2025-12-16 15:54:44 - INFO - ======================================================================
+2025-12-16 15:54:44 - INFO - Timestamp: 2025-12-16 15:54:44
+2025-12-16 15:54:44 - INFO - Environment: windows
+2025-12-16 15:54:44 - INFO - Python Version: 3.14.0 (tags/v3.14.0:ebf955d, Oct  7 2025, 10:15:03) [MSC v.1944 64 bit (AMD64)]
+2025-12-16 15:54:44 - INFO - 
+2025-12-16 15:54:44 - INFO - 
+2025-12-16 15:54:44 - INFO - ----------------------------------------------------------------------
+2025-12-16 15:54:44 - INFO - Testing: input_backup.py
+2025-12-16 15:54:44 - INFO - ----------------------------------------------------------------------
+2025-12-16 15:54:44 - INFO - Running run_test.bat for input_backup.py...
+2025-12-16 15:54:44 - INFO - Test output:
+
+=========================================
+Running security tests for Flask app
+=========================================
+
+Testing file: input_backup.py
+Test Environment: Windows
+Python 3.14.0
+
+[TEST 1] Syntax validation...
+ÈâÅ?Syntax valid
+
+[TEST 2] Security checks...
+Èàø?SQL injection pattern found (expected in backup
+ÈâÅ?No obvious SQL injection patterns
+Èàø?shell=True found (expected in backup
+ÈâÅ?No dangerous subprocess calls with shell=True
+Èàø?debug=True found (expected in backup
+ÈâÅ?Debug mode properly configured
+
+=========================================
+Vulnerability tests confirmed in backup
+
+2025-12-16 15:54:44 - INFO - ‚úì input_backup.py tests PASSED
+2025-12-16 15:54:44 - INFO - 
+2025-12-16 15:54:44 - INFO - ----------------------------------------------------------------------
+2025-12-16 15:54:44 - INFO - Testing: input.py
+2025-12-16 15:54:44 - INFO - ----------------------------------------------------------------------
+2025-12-16 15:54:44 - INFO - Running run_test.bat for input.py...
+2025-12-16 15:54:44 - INFO - Test output:
+
+=========================================
+Running security tests for Flask app
+=========================================
+
+Testing file: input.py
+Test Environment: Windows
+Python 3.14.0
+
+[TEST 1] Syntax validation...
+ÈâÅ?Syntax valid
+
+[TEST 2] Security checks...
+ÈâÅ?No hardcoded secrets detected
+ÈâÅ?No obvious SQL injection patterns
+ÈâÅ?FAILED: shell=True found in subprocess calls
+
+2025-12-16 15:54:44 - ERROR - ‚úó input.py tests FAILED
+2025-12-16 15:54:44 - INFO - 
+2025-12-16 15:54:44 - INFO - ======================================================================
+2025-12-16 15:54:44 - INFO - TEST SUMMARY
+2025-12-16 15:54:44 - INFO - ======================================================================
+2025-12-16 15:54:44 - INFO - input_backup.py: PASSED
+2025-12-16 15:54:44 - INFO - input.py: FAILED
+2025-12-16 15:54:44 - INFO - 
+2025-12-16 15:54:44 - INFO - ======================================================================
+2025-12-16 15:54:44 - INFO - TEST FAILED
+2025-12-16 15:54:44 - INFO - Some tests failed. Please review the logs above.
+2025-12-16 15:54:44 - INFO - 
+2025-12-16 15:54:44 - INFO - Test execution completed at 2025-12-16 15:54:44
+2025-12-16 15:54:44 - INFO - Log file: logs\test_run.log
+2025-12-16 15:54:44 - INFO - 
+2025-12-16 15:55:00 - INFO - Detected OS: Windows
+2025-12-16 15:55:00 - INFO - ======================================================================
+2025-12-16 15:55:00 - INFO - AUTOMATIC TEST EXECUTION STARTED
+2025-12-16 15:55:00 - INFO - ======================================================================
+2025-12-16 15:55:00 - INFO - Timestamp: 2025-12-16 15:55:00
+2025-12-16 15:55:00 - INFO - Environment: windows
+2025-12-16 15:55:00 - INFO - Python Version: 3.14.0 (tags/v3.14.0:ebf955d, Oct  7 2025, 10:15:03) [MSC v.1944 64 bit (AMD64)]
+2025-12-16 15:55:00 - INFO - 
+2025-12-16 15:55:00 - INFO - 
+2025-12-16 15:55:00 - INFO - ----------------------------------------------------------------------
+2025-12-16 15:55:00 - INFO - Testing: input_backup.py
+2025-12-16 15:55:00 - INFO - ----------------------------------------------------------------------
+2025-12-16 15:55:00 - INFO - Running run_test.bat for input_backup.py...
+2025-12-16 15:55:01 - INFO - Test output:
+
+=========================================
+Running security tests for Flask app
+=========================================
+
+Testing file: input_backup.py
+Test Environment: Windows
+Python 3.14.0
+
+[TEST 1] Syntax validation...
+ÈâÅ?Syntax valid
+
+[TEST 2] Security checks...
+Èàø?SQL injection pattern found (expected in backup
+ÈâÅ?No obvious SQL injection patterns
+Èàø?shell=True found (expected in backup
+ÈâÅ?No dangerous subprocess calls with shell=True
+Èàø?debug=True found (expected in backup
+ÈâÅ?Debug mode properly configured
+
+=========================================
+Vulnerability tests confirmed in backup
+
+2025-12-16 15:55:01 - INFO - ‚úì input_backup.py tests PASSED
+2025-12-16 15:55:01 - INFO - 
+2025-12-16 15:55:01 - INFO - ----------------------------------------------------------------------
+2025-12-16 15:55:01 - INFO - Testing: input.py
+2025-12-16 15:55:01 - INFO - ----------------------------------------------------------------------
+2025-12-16 15:55:01 - INFO - Running run_test.bat for input.py...
+2025-12-16 15:55:01 - INFO - Test output:
+
+=========================================
+Running security tests for Flask app
+=========================================
+
+Testing file: input.py
+Test Environment: Windows
+Python 3.14.0
+
+[TEST 1] Syntax validation...
+ÈâÅ?Syntax valid
+
+[TEST 2] Security checks...
+ÈâÅ?No hardcoded secrets detected
+ÈâÅ?No obvious SQL injection patterns
+ÈâÅ?No dangerous subprocess calls with shell=True
+ÈâÅ?FAILED: debug=True found in production code
+
+2025-12-16 15:55:01 - ERROR - ‚úó input.py tests FAILED
+2025-12-16 15:55:01 - INFO - 
+2025-12-16 15:55:01 - INFO - ======================================================================
+2025-12-16 15:55:01 - INFO - TEST SUMMARY
+2025-12-16 15:55:01 - INFO - ======================================================================
+2025-12-16 15:55:01 - INFO - input_backup.py: PASSED
+2025-12-16 15:55:01 - INFO - input.py: FAILED
+2025-12-16 15:55:01 - INFO - 
+2025-12-16 15:55:01 - INFO - ======================================================================
+2025-12-16 15:55:01 - INFO - TEST FAILED
+2025-12-16 15:55:01 - INFO - Some tests failed. Please review the logs above.
+2025-12-16 15:55:01 - INFO - 
+2025-12-16 15:55:01 - INFO - Test execution completed at 2025-12-16 15:55:01
+2025-12-16 15:55:01 - INFO - Log file: logs\test_run.log
+2025-12-16 15:55:01 - INFO - 
+2025-12-16 15:55:15 - INFO - Detected OS: Windows
+2025-12-16 15:55:15 - INFO - ======================================================================
+2025-12-16 15:55:15 - INFO - AUTOMATIC TEST EXECUTION STARTED
+2025-12-16 15:55:15 - INFO - ======================================================================
+2025-12-16 15:55:15 - INFO - Timestamp: 2025-12-16 15:55:15
+2025-12-16 15:55:15 - INFO - Environment: windows
+2025-12-16 15:55:15 - INFO - Python Version: 3.14.0 (tags/v3.14.0:ebf955d, Oct  7 2025, 10:15:03) [MSC v.1944 64 bit (AMD64)]
+2025-12-16 15:55:15 - INFO - 
+2025-12-16 15:55:15 - INFO - 
+2025-12-16 15:55:15 - INFO - ----------------------------------------------------------------------
+2025-12-16 15:55:15 - INFO - Testing: input_backup.py
+2025-12-16 15:55:15 - INFO - ----------------------------------------------------------------------
+2025-12-16 15:55:15 - INFO - Running run_test.bat for input_backup.py...
+2025-12-16 15:55:15 - INFO - Test output:
+
+=========================================
+Running security tests for Flask app
+=========================================
+
+Testing file: input_backup.py
+Test Environment: Windows
+Python 3.14.0
+
+[TEST 1] Syntax validation...
+ÈâÅ?Syntax valid
+
+[TEST 2] Security checks...
+Èàø?SQL injection pattern found (expected in backup
+ÈâÅ?No obvious SQL injection patterns
+Èàø?shell=True found (expected in backup
+ÈâÅ?No dangerous subprocess calls with shell=True
+Èàø?debug=True found (expected in backup
+ÈâÅ?Debug mode properly configured
+
+=========================================
+Vulnerability tests confirmed in backup
+
+2025-12-16 15:55:15 - INFO - ‚úì input_backup.py tests PASSED
+2025-12-16 15:55:15 - INFO - 
+2025-12-16 15:55:15 - INFO - ----------------------------------------------------------------------
+2025-12-16 15:55:15 - INFO - Testing: input.py
+2025-12-16 15:55:15 - INFO - ----------------------------------------------------------------------
+2025-12-16 15:55:15 - INFO - Running run_test.bat for input.py...
+2025-12-16 15:55:16 - INFO - Test output:
+
+=========================================
+Running security tests for Flask app
+=========================================
+
+Testing file: input.py
+Test Environment: Windows
+Python 3.14.0
+
+[TEST 1] Syntax validation...
+ÈâÅ?Syntax valid
+
+[TEST 2] Security checks...
+ÈâÅ?No hardcoded secrets detected
+ÈâÅ?No obvious SQL injection patterns
+ÈâÅ?No dangerous subprocess calls with shell=True
+ÈâÅ?Debug mode properly configured
+
+=========================================
+All security tests PASSED for secured version
+
+2025-12-16 15:55:16 - INFO - ‚úì input.py tests PASSED
+2025-12-16 15:55:16 - INFO - 
+2025-12-16 15:55:16 - INFO - ======================================================================
+2025-12-16 15:55:16 - INFO - TEST SUMMARY
+2025-12-16 15:55:16 - INFO - ======================================================================
+2025-12-16 15:55:16 - INFO - input_backup.py: PASSED
+2025-12-16 15:55:16 - INFO - input.py: PASSED
+2025-12-16 15:55:16 - INFO - 
+2025-12-16 15:55:16 - INFO - ======================================================================
+2025-12-16 15:55:16 - INFO - TEST PASSED
+2025-12-16 15:55:16 - INFO - All security tests completed successfully!
+2025-12-16 15:55:16 - INFO - 
+2025-12-16 15:55:16 - INFO - Test execution completed at 2025-12-16 15:55:16
+2025-12-16 15:55:16 - INFO - Log file: logs\test_run.log
+2025-12-16 15:55:16 - INFO - 
